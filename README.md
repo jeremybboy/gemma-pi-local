@@ -1,17 +1,21 @@
 # Gemma Pi Local
 
-A private text, image, and audio conversation with Gemma 4 on a Raspberry Pi 5, available from a browser on your local network.
+[![CI](https://github.com/jeremybboy/gemma-pi-local/actions/workflows/ci.yml/badge.svg)](https://github.com/jeremybboy/gemma-pi-local/actions/workflows/ci.yml)
 
-> **V0 foundation:** the underlying Gemma 4 E4B model has run successfully on the target 8 GB Pi. The web application and one-command installer are implemented and tested off-device; the complete repository installation is awaiting its first Raspberry Pi validation run.
+Ask Gemma 4 with text, images, and WAV audio on a Raspberry Pi 5, then receive streamed text responses from a browser on your local network.
+
+> **V0 validated:** on 2026-08-23, the repository installed without source edits on the target 8 GB Pi, passed `gemma-pi doctor`, started from one command, served the LAN interface, and completed operator-reported text and multimodal browser interactions.
 
 ## What it does
 
 - Runs [Gemma 4 E4B](https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm) locally through [LiteRT-LM](https://github.com/google-ai-edge/LiteRT-LM).
-- Provides one browser conversation for text, an optional image, and an optional WAV file.
-- Streams the answer and renders uploaded images and audio players in the chat.
+- Accepts text plus an optional image and optional WAV file in one browser conversation.
+- Streams Gemma's text answer and renders uploaded images and audio players in the chat.
 - Shows model readiness, Pi temperature, throttle state, memory, and disk space.
 - Keeps chat history only in the current browser tab; no database or cloud service is used.
 - Starts the model server and web interface with one command.
+
+V0 analyzes media but does not generate images or audio. Generated media would require separate local models and is future work, not a hidden or broken feature.
 
 ## Target
 
@@ -84,7 +88,9 @@ See [SECURITY.md](SECURITY.md) for reporting and deployment guidance.
 
 Direct model inference on the target Raspberry Pi succeeded with one prompt containing text, a synthetic PNG, and a synthetic WAV. Gemma correctly described the illustrated house and recognized that the tones ascended, but reported 10 tones when the fixture contained 3; multimodal understanding is useful but not measurement-grade. During that run, memory stayed within 8 GB with no swap use, temperature peaked at 73.6 C, later returned to 55.4 C, and firmware reported `throttled=0x0`.
 
-The repository's validation matrix and copy-paste Pi procedure are in [docs/PI_VALIDATION.md](docs/PI_VALIDATION.md). Until that procedure passes, installation, startup, browser behavior, and shutdown on the target Pi remain **pending**, not proven.
+The merged repository was then installed from `main` on that Pi. Captured terminal evidence confirms ARM64, 8 GB RAM, 34 GB free disk, Python 3.13.5, LiteRT-LM 0.16.1, imported `gemma4-e4b`, 51.0 C, `throttled=0x0`, a ready doctor result, and successful LAN startup. The operator reported that browser interaction and media understanding worked and that responses were text-only as designed.
+
+The exact evidence boundary, remaining uncaptured checks, and repeatable procedure are in [docs/PI_VALIDATION.md](docs/PI_VALIDATION.md). Release history is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Architecture
 

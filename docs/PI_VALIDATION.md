@@ -1,22 +1,50 @@
 # Raspberry Pi validation
 
-This document separates completed model evidence from pending application evidence.
+This record separates captured terminal evidence, operator-reported browser evidence, and checks whose output was not captured.
 
-## Existing target evidence
+## Target
 
-The initial target is a Raspberry Pi 5 with 8 GB RAM, ARM64 Debian 13 (Trixie), a 59 GB ext4 root filesystem on microSD, and active cooling. Before repository installation it had about 45 GB free, temperature readings between 33.4 C and 38.4 C at idle, and a current firmware throttle value of `0x0`.
+- Raspberry Pi 5, 8 GB RAM, ARM64 Debian 13 (Trixie)
+- 59 GB ext4 root filesystem on microSD with active cooling
+- Python 3.13.5
+- LiteRT-LM 0.16.1
+- Gemma 4 E4B LiteRT model, imported as `gemma4-e4b`
 
-LiteRT-LM 0.16.1 and the 3.4 GiB Gemma 4 E4B LiteRT model were run from a separate experiment. Text inference worked. A single text, synthetic-image, and synthetic-WAV request also worked: the image description and ascending pitch direction were correct, but the model counted 10 tones instead of the 3 in the fixture. Peak observed temperature was 73.6 C, later 55.4 C, with no swap use and `throttled=0x0`.
+## Validation record: 2026-08-23
 
-This proves basic model inference on that Pi. It does not yet prove this repository's installer, process control, web UI, or shutdown path.
+The repository was cloned from merged `main` after PR #1 (`bb1ae07`). The installer reused the existing Hugging Face cache, imported the model into LiteRT-LM's registry, installed all application dependencies, and added the user command without source edits.
 
-## First repository validation run
+Captured `gemma-pi doctor` evidence:
 
-Run from the Pi over SSH after the feature PR is available:
+| Check | Result |
+| --- | --- |
+| Architecture | `aarch64` — pass |
+| Memory | 8063 MiB total, 7650 MiB available — pass |
+| Disk | 34 GiB free — pass |
+| Python | 3.13.5 — pass |
+| LiteRT-LM | 0.16.1 — pass |
+| Model | `gemma4-e4b` imported — pass |
+| Temperature | 51.0 C |
+| Firmware throttle | `throttled=0x0` — pass |
+| Doctor result | ready |
+
+`gemma-pi start` completed and printed a ready LAN URL. The operator then reported that the browser interface worked, text responses streamed, and uploaded media was recognized by the model. Gemma returned text; it did not generate images or audio, which is the intended V0 boundary.
+
+Earlier direct-model testing also exercised text, a synthetic PNG, and a synthetic WAV in one prompt. The image description and ascending pitch direction were correct, but Gemma counted 10 tones when the fixture contained 3. That result demonstrates useful multimodal interpretation, not measurement-grade audio analysis.
+
+## Evidence not captured
+
+- The exact output of `scripts/smoke-test.sh` was not pasted into the validation record.
+- A post-inference memory and temperature snapshot was not captured for the repository run.
+- A clean `gemma-pi stop` followed by stopped status was not captured.
+
+These are evidence gaps, not known failures. They must not be silently promoted to passes.
+
+## Repeatable validation procedure
 
 ```bash
 cd ~
-git clone --branch feature/v1-foundation https://github.com/jeremybboy/gemma-pi-local.git
+git clone https://github.com/jeremybboy/gemma-pi-local.git
 cd gemma-pi-local
 ./install.sh
 ~/.local/bin/gemma-pi doctor
@@ -25,17 +53,7 @@ cd gemma-pi-local
 ./scripts/smoke-test.sh
 ```
 
-From a browser on the same LAN, open the URL from `gemma-pi ui` and verify:
-
-1. Status changes to ready and displays temperature, memory, and disk.
-2. A text-only prompt streams a response.
-3. A PNG or JPEG plus text streams a grounded response and displays the preview.
-4. A WAV plus text streams a grounded response and displays a playable audio control.
-5. One message with image, WAV, and text streams a response that acknowledges both files.
-6. Reset removes the visible conversation.
-7. A page refresh starts an empty conversation.
-
-Then capture health and stop cleanly:
+From a browser on the same trusted LAN, open the URL from `gemma-pi ui` and verify text, image plus text, WAV plus text, image plus WAV plus text, reset, and page-refresh behavior. Then capture health and stop cleanly:
 
 ```bash
 vcgencmd measure_temp
@@ -46,13 +64,4 @@ free -h
 ~/.local/bin/gemma-pi status
 ```
 
-## Pass criteria
-
-- Installation and commands complete without manual source edits.
-- The model server remains bound to loopback and the UI is reachable only as configured.
-- All five browser checks complete without a process crash or swap exhaustion.
-- `gemma-pi stop` terminates both services.
-- Logs do not contain credentials or unexpected remote calls.
-- Temperature and throttle observations are recorded, not generalized beyond the tested hardware.
-
-Record failures verbatim and keep the PR in draft until material defects are fixed. Model answer correctness should be described separately from transport and UI success.
+Model-answer correctness must be recorded separately from installer, transport, UI, resource, and process-control success.
