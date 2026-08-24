@@ -126,6 +126,8 @@ The automated tests mock LiteRT-LM; they do not prove inference performance or R
 
 V0 optimizes for a repeatable local multimodal experiment, not a benchmark suite or a polished appliance. Next candidates include Behringer recording, generated-media rendering, optional authentication, persistent opt-in chats, service installation, and broader hardware validation; see [docs/ROADMAP.md](docs/ROADMAP.md).
 
+An experimental branch is adding model-initiated, no-fee web search through a loopback-only SearXNG service. The implementation and real-Pi evidence gates are tracked in [docs/AGENTIC_SEARCH.md](docs/AGENTIC_SEARCH.md); this is not part of the validated V0 feature set yet.
+
 Related work worth studying includes [Mote](https://github.com/mkturkcan/mote), which focuses on highly optimized Gemma text inference on Raspberry Pi 5. This repository's different focus is a small, auditable, LiteRT-LM multimodal browser experience with operational health checks and explicit validation boundaries.
 
 ## Model terms and license
