@@ -11,6 +11,7 @@
 
 ## Candidate V0.2 work
 
+- Model-initiated SearXNG search with one bounded tool call, visible sources, and local-Pi validation.
 - Package deterministic multimodal fixtures and expected capability-level checks.
 - Capture repeatable shutdown, post-inference thermal, memory, and timing evidence.
 - Improve cancellation, inference timing, and memory/thermal observations.

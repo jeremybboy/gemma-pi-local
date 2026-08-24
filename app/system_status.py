@@ -9,6 +9,14 @@ import subprocess
 from typing import Any
 
 
+THROTTLE_FLAGS = (
+    (0, "undervoltage"),
+    (1, "arm_frequency_capped"),
+    (2, "throttled"),
+    (3, "soft_temperature_limit"),
+)
+
+
 def _read_text(path: str) -> str | None:
     try:
         return Path(path).read_text(encoding="utf-8").strip()
@@ -70,13 +78,38 @@ def _temperature_c() -> float | None:
 def _throttled() -> dict[str, Any]:
     raw = _run(["vcgencmd", "get_throttled"])
     if not raw or "=" not in raw:
-        return {"raw": None, "active_or_historical": None}
+        return {
+            "raw": None,
+            "active": None,
+            "historical": None,
+            "active_flags": [],
+            "historical_flags": [],
+            "active_or_historical": None,
+        }
     value = raw.split("=", 1)[1].strip()
     try:
         numeric = int(value, 16)
     except ValueError:
-        return {"raw": value, "active_or_historical": None}
-    return {"raw": value, "active_or_historical": numeric != 0}
+        return {
+            "raw": value,
+            "active": None,
+            "historical": None,
+            "active_flags": [],
+            "historical_flags": [],
+            "active_or_historical": None,
+        }
+    active_flags = [name for bit, name in THROTTLE_FLAGS if numeric & (1 << bit)]
+    historical_flags = [
+        name for bit, name in THROTTLE_FLAGS if numeric & (1 << (bit + 16))
+    ]
+    return {
+        "raw": value,
+        "active": bool(active_flags),
+        "historical": bool(historical_flags),
+        "active_flags": active_flags,
+        "historical_flags": historical_flags,
+        "active_or_historical": bool(active_flags or historical_flags),
+    }
 
 
 def snapshot() -> dict[str, Any]:

@@ -30,6 +30,7 @@ const elements = {
   temperature: document.querySelector("#temperature"),
   memory: document.querySelector("#memory"),
   throttling: document.querySelector("#throttling"),
+  searchStatus: document.querySelector("#search-status"),
 };
 
 function formatBytes(bytes) {
@@ -66,6 +67,10 @@ function setBusy(busy) {
   elements.audioButton.disabled = busy;
   elements.reset.disabled = busy;
   elements.send.querySelector("span").textContent = busy ? "Thinking" : "Send";
+}
+
+function setActivity(label) {
+  if (state.busy) elements.send.querySelector("span").textContent = label;
 }
 
 function resizePrompt() {
@@ -161,6 +166,47 @@ function trimHistory() {
   }
 }
 
+function renderSearchSources(output, payload) {
+  const body = output.closest(".message-body");
+  if (!body) return;
+  body.querySelector(".search-sources")?.remove();
+
+  const panel = document.createElement("section");
+  panel.className = "search-sources";
+  const heading = document.createElement("div");
+  heading.className = "search-sources-heading";
+  heading.textContent = `Web search · ${payload.query || "current information"}`;
+  panel.append(heading);
+
+  const sources = Array.isArray(payload.sources) ? payload.sources : [];
+  if (!sources.length) {
+    const empty = document.createElement("p");
+    empty.textContent = "No source links were returned.";
+    panel.append(empty);
+  } else {
+    const list = document.createElement("ol");
+    for (const source of sources) {
+      if (typeof source?.url !== "string" || typeof source?.title !== "string") continue;
+      const item = document.createElement("li");
+      const link = document.createElement("a");
+      link.href = source.url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = source.title;
+      const origin = document.createElement("small");
+      try {
+        origin.textContent = new URL(source.url).hostname;
+      } catch {
+        origin.textContent = "external source";
+      }
+      item.append(link, origin);
+      list.append(item);
+    }
+    panel.append(list);
+  }
+  body.append(panel);
+}
+
 async function parseEventStream(response, output) {
   if (!response.body) throw new Error("Streaming is unavailable in this browser.");
   const reader = response.body.getReader();
@@ -187,8 +233,15 @@ async function parseEventStream(response, output) {
         if (payload.error) {
           throw new Error(payload.error);
         }
+        if (payload.type === "search") {
+          setActivity("Searching");
+          output.textContent = `Searching the web for “${payload.query || "current information"}”…`;
+          renderSearchSources(output, payload);
+          continue;
+        }
         const delta = payload.choices?.[0]?.delta?.content;
         if (typeof delta === "string") {
+          setActivity("Answering");
           completeText += delta;
           output.textContent = completeText;
           elements.messages.scrollTop = elements.messages.scrollHeight;
@@ -345,8 +398,23 @@ async function refreshStatus() {
       ? `${formatBytes(available)} / ${formatBytes(total)}`
       : "Unavailable";
     const throttle = system.throttled?.active_or_historical;
-    elements.throttling.textContent = throttle === false ? "None" : throttle === true ? "Detected" : "Unavailable";
-    elements.throttling.classList.toggle("warning", throttle === true);
+    const activeThrottle = system.throttled?.active;
+    const historicalThrottle = system.throttled?.historical;
+    elements.throttling.textContent = activeThrottle === true
+      ? "Active"
+      : historicalThrottle === true
+        ? "Past event"
+        : throttle === false
+          ? "None"
+          : "Unavailable";
+    elements.throttling.classList.toggle("warning", activeThrottle === true || historicalThrottle === true);
+    const searchReady = Boolean(payload.search?.ok);
+    elements.searchStatus.textContent = searchReady
+      ? "Ready"
+      : payload.search?.enabled === false
+        ? "Disabled"
+        : "Offline";
+    elements.searchStatus.classList.toggle("warning", !searchReady);
   } catch {
     elements.runtimeState.dataset.state = "offline";
     elements.runtimeLabel.textContent = "App status unavailable";

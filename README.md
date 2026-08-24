@@ -10,7 +10,8 @@ Ask Gemma 4 with text, images, and WAV audio on a Raspberry Pi 5, then receive s
 
 - Runs [Gemma 4 E4B](https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm) locally through [LiteRT-LM](https://github.com/google-ai-edge/LiteRT-LM).
 - Accepts text plus an optional image and optional WAV file in one browser conversation.
-- Streams Gemma's text answer and renders uploaded images and audio players in the chat.
+- Returns Gemma's text answer and renders uploaded images and audio players in the chat; evidence-grounded search answers stream after the tool decision.
+- Lets Gemma request one bounded public-web search through a loopback-only SearXNG service, then shows numbered source links.
 - Shows model readiness, Pi temperature, throttle state, memory, and disk space.
 - Keeps chat history only in the current browser tab; no database or cloud service is used.
 - Starts the model server and web interface with one command.
@@ -23,11 +24,13 @@ V0 is deliberately narrow: Raspberry Pi 5, 8 GB RAM, ARM64 Linux, active cooling
 
 ## Install on the Pi
 
-Install system prerequisites first:
+Install system prerequisites first. Docker runs the local SearXNG service; reconnect after adding your user to its group:
 
 ```bash
 sudo apt update
-sudo apt install -y git python3-venv curl
+sudo apt install -y git python3-venv curl docker.io docker-compose
+sudo systemctl enable --now docker
+sudo usermod -aG docker "$USER"
 ```
 
 Then clone and install:
@@ -74,13 +77,13 @@ Defaults work for the target Pi. For changes, copy the example and edit it befor
 cp .env.example .env
 ```
 
-The web UI defaults to `0.0.0.0:8080`. LiteRT-LM defaults to `127.0.0.1:9379` and must remain loopback-only unless you add a separate security layer.
+The web UI defaults to `0.0.0.0:8080`. LiteRT-LM defaults to `127.0.0.1:9379`, and SearXNG defaults to `127.0.0.1:8888`; both must remain loopback-only unless you add a separate security layer.
 
 ## Security boundary
 
 V0 has **no authentication or TLS**. Use it only on a private, trusted LAN; do not port-forward it, expose it to the public internet, or run it on an untrusted Wi-Fi network. Uploaded media and prompts are sent only to the local LiteRT-LM service, but anyone who can reach port 8080 can submit prompts and consume Pi resources.
 
-The gateway accepts inline PNG, JPEG, or WebP images and WAV audio. It rejects remote media URLs, unsupported message roles, oversized requests, multiple images or audio files in one message, and arbitrary model identifiers.
+The gateway accepts inline PNG, JPEG, or WebP images and WAV audio. It rejects remote media URLs, unsupported message roles, oversized requests, multiple images or audio files in one message, arbitrary model identifiers, unknown tools, multiple tool calls, and non-loopback search services. Search queries leave the Pi through SearXNG and configured upstream search engines.
 
 See [SECURITY.md](SECURITY.md) for reporting and deployment guidance.
 
@@ -100,10 +103,10 @@ Trusted-LAN browser
         | HTTP :8080
         v
 FastAPI gateway + static UI
-        |
-        | OpenAI-compatible HTTP :9379 (loopback only)
-        v
-LiteRT-LM -> Gemma 4 E4B
+        |                              |
+        | HTTP :9379 (loopback)        | HTTP :8888 (loopback)
+        v                              v
+LiteRT-LM -> Gemma 4 E4B           SearXNG -> public search engines
 ```
 
 The UI has no JavaScript build step or external CDN. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for request flow and design boundaries.
@@ -125,6 +128,8 @@ The automated tests mock LiteRT-LM; they do not prove inference performance or R
 ## Direction
 
 V0 optimizes for a repeatable local multimodal experiment, not a benchmark suite or a polished appliance. Next candidates include Behringer recording, generated-media rendering, optional authentication, persistent opt-in chats, service installation, and broader hardware validation; see [docs/ROADMAP.md](docs/ROADMAP.md).
+
+An experimental branch adds model-initiated, no-fee web search through a loopback-only SearXNG service. Structured tool calling and standalone SearXNG passed the first target-Pi gate; the complete two-pass browser path is not yet target-Pi validated. Implementation and evidence gates are tracked in [docs/AGENTIC_SEARCH.md](docs/AGENTIC_SEARCH.md).
 
 Related work worth studying includes [Mote](https://github.com/mkturkcan/mote), which focuses on highly optimized Gemma text inference on Raspberry Pi 5. This repository's different focus is a small, auditable, LiteRT-LM multimodal browser experience with operational health checks and explicit validation boundaries.
 

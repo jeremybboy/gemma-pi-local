@@ -127,7 +127,7 @@ summary:focus-visible {
 
 .status-strip {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(190px, 1.35fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(190px, 1.35fr);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: rgba(21, 27, 21, 0.86);
@@ -323,6 +323,53 @@ h1 {
 
 .message.error .message-text {
   color: var(--danger);
+}
+
+.search-sources {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface-raised);
+}
+
+.search-sources-heading {
+  margin-bottom: 9px;
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.search-sources ol {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 22px;
+}
+
+.search-sources li {
+  padding-left: 3px;
+  color: var(--faint);
+}
+
+.search-sources a {
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.search-sources small {
+  display: block;
+  margin-top: 2px;
+  color: var(--faint);
+}
+
+.search-sources p {
+  margin: 0;
+  color: var(--faint);
+  font-size: 0.82rem;
 }
 
 .message-media {
@@ -527,8 +574,13 @@ textarea::placeholder {
     border-right: 0;
   }
 
-  .metric:nth-child(3),
   .metric:nth-child(4) {
+    border-right: 0;
+  }
+
+  .metric-model {
+    grid-column: 1 / -1;
+    border-right: 0;
     border-bottom: 0;
   }
 
