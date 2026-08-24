@@ -11,7 +11,7 @@ Browser message
 Gemma pass 1 -- decides locally whether web_search(query) is needed
     | no                                  | yes (at most once)
     v                                     v
-Stream local answer                 SearXNG on 127.0.0.1:8888
+Return local answer                 SearXNG on 127.0.0.1:8888
                                           |
                                           v
                                   bounded result snippets
@@ -32,16 +32,24 @@ Implemented on `feature/agentic-web-search`:
 - A loopback-only SearXNG Compose service on port 8888 with JSON output enabled.
 - A constrained Python adapter with a 300-character query cap, fixed loopback service URL, timeout, maximum result count, URL validation, deduplication, and deterministic source numbers.
 - A real-runtime probe that checks whether LiteRT-LM 0.16.1 returns OpenAI-compatible structured `tool_calls` for Gemma 4 E4B.
-- Local automated tests for the adapter and existing V0 gateway.
+- A guarded `/api/chat` loop: one non-streamed model decision, at most one search, then one streamed evidence-grounded answer.
+- Browser searching state, deterministic source links, and separate current-versus-historical throttle display.
+- `gemma-pi start` attempts to ensure SearXNG is running; `gemma-pi stop` leaves the lightweight search service available.
+- Local automated tests for the adapter, tool protocol, gateway, and existing V0 behavior.
 
-Not implemented yet:
+Not validated yet:
 
-- Executing the tool from `/api/chat`.
-- The second Gemma pass and cited answer stream.
-- Browser searching state and source cards.
-- Starting SearXNG from the public `gemma-pi start` command.
+- The complete two-pass `/api/chat` path on the target Pi.
+- Browser rendering of live source cards on the target Pi.
+- Repeated thermal, memory, and shutdown behavior under full search-answer cycles.
 
-Those pieces are intentionally gated on the real Pi tool-call probe. Treating text that merely resembles a function call as authorization to access the web would be brittle and unsafe.
+Treating text that merely resembles a function call as authorization to access the web remains forbidden. Only the validated structured call is executable.
+
+## Gate 1 result: passed on the target Pi
+
+On 2026-08-24, the target Raspberry Pi returned a structured `web_search` call for `current Raspberry Pi OS release`, SearXNG returned live results, and its log showed one Granian worker. The snapshot reported 2.6 GiB used, 5.2 GiB available, no swap use, and 61.5 C.
+
+`throttled=0xe0000` had no active low-bit condition, but it records historical Arm frequency capping, throttling, and a soft-temperature-limit event. This is not a clean thermal-history result. Docker reported `0B / 0B` for container memory, so SearXNG-specific memory remains unmeasured; system-wide memory is the usable evidence.
 
 ## Why SearXNG runs on the Pi
 
@@ -62,7 +70,7 @@ The official SearXNG documentation advises keeping Granian's worker defaults. We
 From the repository on the Raspberry Pi, first check whether Docker is already available:
 
 ```bash
-cd ~/gemma-pi-local
+cd /home/uzan/gemma4-lab/gemma-pi-local
 docker --version
 docker compose version
 ```
@@ -78,22 +86,31 @@ sudo usermod -aG docker "$USER"
 Reconnect the SSH session so the new `docker` group applies, then run the complete first gate:
 
 ```bash
-cd ~/gemma-pi-local
+cd /home/uzan/gemma4-lab/gemma-pi-local
 ./scripts/pi-search-gate.sh
 ```
 
 The gate script starts SearXNG, executes a live search, starts Gemma Pi Local if needed, checks for a structured tool call, and prints one resource snapshot. To run only the model tool-call check against an already-running LiteRT-LM server, execute:
 
 ```bash
-cd ~/gemma-pi-local
+cd /home/uzan/gemma4-lab/gemma-pi-local
 .venv/bin/python scripts/probe-tool-call.py
 ```
 
 The gate passes only if the script prints `PASS` and a structured `web_search` call containing a string `query`. A prose answer, a code block, or JSON embedded only in `content` does not pass.
 
-## Real-Pi gate 2: resource capture
+## Real-Pi gate 2: integrated chat and resource capture
 
-After SearXNG is running but before integrating it into chat, capture:
+After pulling the latest feature branch, restart Gemma Pi Local so the new gateway code is loaded, then run one local turn and one complete search-answer turn:
+
+```bash
+cd /home/uzan/gemma4-lab/gemma-pi-local
+~/.local/bin/gemma-pi stop
+~/.local/bin/gemma-pi start
+.venv/bin/python scripts/probe-agent-search.py --cycles 1
+```
+
+Then capture:
 
 ```bash
 docker stats --no-stream gemma-pi-searxng

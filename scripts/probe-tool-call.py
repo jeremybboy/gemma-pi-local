@@ -11,28 +11,7 @@ from typing import Any
 
 import httpx
 
-
-WEB_SEARCH_TOOL = {
-    "type": "function",
-    "function": {
-        "name": "web_search",
-        "description": (
-            "Search the current public web when the answer requires recent or "
-            "externally verified information."
-        ),
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "A concise standalone web search query.",
-                }
-            },
-            "required": ["query"],
-            "additionalProperties": False,
-        },
-    },
-}
+from app.agent import WEB_SEARCH_TOOL
 
 
 def parse_args() -> argparse.Namespace:

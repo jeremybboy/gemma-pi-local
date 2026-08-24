@@ -70,7 +70,7 @@ class Settings:
         "GEMMA_PI_MAX_ATTACHMENT_BYTES", 8 * 1024 * 1024
     )
     max_messages: int = _positive_int("GEMMA_PI_MAX_MESSAGES", 24)
-    search_enabled: bool = _boolean("GEMMA_PI_SEARCH_ENABLED", False)
+    search_enabled: bool = _boolean("GEMMA_PI_SEARCH_ENABLED", True)
     searxng_base_url: str = os.getenv(
         "GEMMA_PI_SEARXNG_URL", "http://127.0.0.1:8888"
     ).rstrip("/")

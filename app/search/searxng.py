@@ -70,7 +70,13 @@ def _normalize_result(raw: Any) -> SearchResult | None:
         return None
     title = " ".join(title.split())[:300]
     parsed_url = urlparse(url.strip())
-    if not title or parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
+    if (
+        not title
+        or parsed_url.scheme not in {"http", "https"}
+        or not parsed_url.netloc
+        or parsed_url.username
+        or parsed_url.password
+    ):
         return None
     content = raw.get("content", "")
     snippet = " ".join(content.split())[:MAX_SNIPPET_CHARS] if isinstance(content, str) else ""
@@ -101,6 +107,19 @@ class SearXNGClient:
         self.timeout_seconds = timeout_seconds
         self.max_results = max_results
         self.transport = transport
+
+    async def health(self) -> None:
+        """Require a successful response from the fixed local service."""
+
+        try:
+            async with httpx.AsyncClient(
+                timeout=self.timeout_seconds,
+                transport=self.transport,
+            ) as client:
+                response = await client.get(self.base_url)
+                response.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise SearchError(f"Local SearXNG health check failed: {exc}") from exc
 
     async def search(self, query: str) -> list[SearchResult]:
         normalized_query = _validate_query(query)

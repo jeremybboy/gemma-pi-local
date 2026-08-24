@@ -29,6 +29,10 @@ async def test_search_normalizes_bounds_and_deduplicates_results() -> None:
                     },
                     {"title": "unsafe", "url": "file:///etc/passwd"},
                     {
+                        "title": "credential URL",
+                        "url": "https://user:password@example.net/private",
+                    },
+                    {
                         "title": "Second result",
                         "url": "http://example.org/two",
                         "content": "second snippet",
@@ -67,6 +71,13 @@ async def test_search_rejects_bad_response() -> None:
     client = SearXNGClient("http://localhost:8888", transport=transport)
     with pytest.raises(SearchError, match="invalid JSON response"):
         await client.search("test")
+
+
+@pytest.mark.asyncio
+async def test_search_health_requires_successful_loopback_response() -> None:
+    transport = httpx.MockTransport(lambda _request: httpx.Response(200, text="ready"))
+    client = SearXNGClient("http://127.0.0.1:8888", transport=transport)
+    await client.health()
 
 
 @pytest.mark.parametrize(

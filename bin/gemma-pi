@@ -6,13 +6,40 @@ ROOT_DIR="$(cd "$(dirname "${SCRIPT_PATH}")/.." && pwd)"
 RUNTIME_DIR="${ROOT_DIR}/.runtime"
 PID_FILE="${RUNTIME_DIR}/gemma-pi.pid"
 LOG_FILE="${RUNTIME_DIR}/gemma-pi.log"
+
+if [[ -f "${ROOT_DIR}/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "${ROOT_DIR}/.env"
+  set +a
+fi
+
 APP_PORT="${GEMMA_PI_PORT:-8080}"
+SEARCH_ENABLED="${GEMMA_PI_SEARCH_ENABLED:-true}"
 
 is_running() {
   [[ -f "${PID_FILE}" ]] || return 1
   local pid
   pid="$(cat "${PID_FILE}")"
   [[ -n "${pid}" ]] && kill -0 "${pid}" 2>/dev/null
+}
+
+search_enabled() {
+  case "${SEARCH_ENABLED,,}" in
+    1|true|yes|on) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+ensure_search() {
+  search_enabled || return 0
+  if ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1; then
+    echo "Warning: Docker Compose is unavailable; web-search requests will be unavailable." >&2
+    return 0
+  fi
+  if ! "${ROOT_DIR}/scripts/searxng.sh" start; then
+    echo "Warning: SearXNG did not start; web-search requests will be unavailable." >&2
+  fi
 }
 
 show_help() {
@@ -32,6 +59,7 @@ EOF
 }
 
 start_app() {
+  ensure_search
   if is_running; then
     echo "Gemma Pi Local is already running (PID $(cat "${PID_FILE}"))."
     return
@@ -109,6 +137,8 @@ except Exception as exc:
 system = data.get("system", {})
 litert = data.get("litert", {})
 print(f"LiteRT-LM: {'ready' if litert.get('ok') else 'offline'}")
+search = data.get("search", {})
+print(f"Web search: {'ready' if search.get('ok') else 'offline'}")
 print(f"Temperature: {system.get('temperature_c', 'unavailable')} C")
 print(f"Throttled: {system.get('throttled', {}).get('raw', 'unavailable')}")
 PY
