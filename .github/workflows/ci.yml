@@ -30,4 +30,4 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Check shell syntax
-        run: bash -n install.sh start.sh bin/gemma-pi scripts/doctor.sh scripts/smoke-test.sh scripts/searxng.sh
+        run: bash -n install.sh start.sh bin/gemma-pi scripts/doctor.sh scripts/smoke-test.sh scripts/searxng.sh scripts/pi-search-gate.sh

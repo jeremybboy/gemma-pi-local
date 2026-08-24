@@ -75,18 +75,14 @@ sudo apt install -y docker.io docker-compose
 sudo usermod -aG docker "$USER"
 ```
 
-Reconnect the SSH session so the new `docker` group applies, then start and test the loopback service:
+Reconnect the SSH session so the new `docker` group applies, then run the complete first gate:
 
 ```bash
 cd ~/gemma-pi-local
-./scripts/searxng.sh start
-./scripts/searxng.sh status
-./scripts/searxng.sh test > /tmp/gemma-pi-searxng-test.json
-python3 -c 'import json; p=json.load(open("/tmp/gemma-pi-searxng-test.json")); print("results:", len(p.get("results", []))); print("engines:", sorted({e for r in p.get("results", []) for e in r.get("engines", [])})[:10])'
-./scripts/searxng.sh logs
+./scripts/pi-search-gate.sh
 ```
 
-With the existing Gemma Pi model server running, execute:
+The gate script starts SearXNG, executes a live search, starts Gemma Pi Local if needed, checks for a structured tool call, and prints one resource snapshot. To run only the model tool-call check against an already-running LiteRT-LM server, execute:
 
 ```bash
 cd ~/gemma-pi-local
