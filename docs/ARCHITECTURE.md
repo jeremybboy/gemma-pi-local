@@ -3,10 +3,10 @@
 ## Components
 
 1. `static/` is an offline browser client built with plain HTML, CSS, and JavaScript. It holds the current tab's conversation and media previews in memory.
-2. `app/` is a small FastAPI gateway. It serves the UI, validates requests, reports non-sensitive Pi health, controls the single allowed web-search tool, and streams LiteRT-LM responses.
+2. `app/` is a small FastAPI gateway. It serves the UI, validates requests, reports non-sensitive host health, controls the single allowed web-search tool, and streams LiteRT-LM responses.
 3. LiteRT-LM serves its OpenAI-compatible API on loopback and owns model loading and inference.
 4. SearXNG serves its JSON Search API on loopback port 8888. It is the only component that queries external search engines.
-5. `bin/gemma-pi` starts SearXNG when available, controls the model/UI processes, and exposes status, logs, URL, and doctor commands.
+5. `bin/gemma-pi` (also installed as `gemma-local` on macOS) starts SearXNG when available, controls the model/UI processes, and exposes status, logs, URL, and doctor commands.
 
 ## Multimodal request flow
 
@@ -25,7 +25,7 @@ With search disabled, LiteRT-LM emits server-sent events that the gateway relays
 
 ## Trust boundaries
 
-Port 8080 is the LAN boundary and is unauthenticated. Ports 9379 and 8888 are the model and search boundaries and remain loopback-only. Search titles and snippets are untrusted external input. Input validation reduces accidental and obvious abuse but is not a substitute for authentication, TLS, rate limiting, or network isolation.
+On the Pi, port 8080 is the unauthenticated trusted-LAN boundary. On macOS it binds to loopback by default, making the browser on that Mac the boundary. Ports 9379 and 8888 are the model and search boundaries and remain loopback-only. Search titles and snippets are untrusted external input. Input validation reduces accidental and obvious abuse but is not a substitute for authentication, TLS, rate limiting, or network isolation.
 
 ## Resource choices
 

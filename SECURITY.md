@@ -6,9 +6,10 @@ Only the latest commit on `main` receives security fixes during this experimenta
 
 ## Deployment boundary
 
-V0 is designed for one user on a trusted private LAN. It has no authentication, authorization, TLS, rate limiting, or user isolation.
+V0 is designed for one user: on a trusted private LAN for the Pi profile, or localhost-only by default for the macOS profile. It has no authentication, authorization, TLS, rate limiting, or user isolation.
 
 - Keep LiteRT-LM bound to `127.0.0.1`.
+- Keep the macOS web UI bound to `127.0.0.1` unless a separate security layer is added.
 - Do not expose port 8080 through router port forwarding, a public IP, or an untrusted wireless network.
 - Use a host firewall or private overlay network if the LAN is not fully trusted.
 - Treat prompts, uploads, and model answers as untrusted data.

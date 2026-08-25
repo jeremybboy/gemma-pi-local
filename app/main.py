@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 
 from app.agent import (
     AGENT_SYSTEM_MESSAGE,
+    DIRECT_SYSTEM_MESSAGE,
     WEB_SEARCH_TOOL,
     AgentProtocolError,
     assistant_tool_message,
@@ -138,7 +139,7 @@ def validate_messages(messages: list[dict[str, Any]]) -> None:
 
 async def _litert_models() -> tuple[bool, list[dict[str, Any]], str | None]:
     try:
-        async with httpx.AsyncClient(timeout=3.0) as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(f"{settings.litert_base_url}/models")
             response.raise_for_status()
             payload = response.json()
@@ -305,7 +306,7 @@ async def chat(chat_request: ChatRequest):
 
     direct_payload = {
         "model": model,
-        "messages": chat_request.messages,
+        "messages": [DIRECT_SYSTEM_MESSAGE, *chat_request.messages],
         "temperature": chat_request.temperature,
         "max_completion_tokens": chat_request.max_tokens,
         "stream": True,

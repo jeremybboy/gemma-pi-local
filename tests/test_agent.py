@@ -2,7 +2,22 @@ import json
 
 import pytest
 
-from app.agent import AgentProtocolError, choice_message, web_search_request
+from app.agent import (
+    AGENT_SYSTEM_MESSAGE,
+    DIRECT_SYSTEM_MESSAGE,
+    AgentProtocolError,
+    choice_message,
+    web_search_request,
+)
+
+
+def test_system_identity_matches_local_deployment() -> None:
+    for message in (DIRECT_SYSTEM_MESSAGE, AGENT_SYSTEM_MESSAGE):
+        content = message["content"]
+        assert "running locally through LiteRT-LM" in content
+        assert "not Google's hosted Gemini service" in content
+        assert "does not run on Google servers" in content
+        assert "never substitute a generic hosted-model description" in content
 
 
 def test_parses_one_structured_web_search_call() -> None:

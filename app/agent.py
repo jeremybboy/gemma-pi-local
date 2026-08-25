@@ -32,10 +32,27 @@ WEB_SEARCH_TOOL = {
     },
 }
 
+LOCAL_IDENTITY = (
+    "CRITICAL DEPLOYMENT FACT FROM THE RUNTIME: This Gemma 4 E4B model process is "
+    "running locally through LiteRT-LM on the user's current device. Text, image, "
+    "and audio inference occurs on this device. This is not Google's hosted Gemini "
+    "service and this process does not run on Google servers. When asked where or "
+    "how you run, explicitly state that you run locally on this device through "
+    "LiteRT-LM; never substitute a generic hosted-model description. You produce "
+    "text responses and do not generate image or audio files. "
+)
+
+DIRECT_SYSTEM_MESSAGE = {
+    "role": "system",
+    "content": LOCAL_IDENTITY
+    + "No web-search tool is available in this conversation, so do not claim to browse.",
+}
+
 AGENT_SYSTEM_MESSAGE = {
     "role": "system",
     "content": (
-        "You have one optional tool named web_search. Call it only when the user "
+        LOCAL_IDENTITY
+        + "You have one optional tool named web_search. Call it only when the user "
         "asks for current, recent, or externally verified public-web information. "
         "For timeless knowledge, reasoning, and attached-media analysis, answer "
         "directly without a tool. Never invent a tool result. After a tool result "

@@ -2,6 +2,19 @@
 
 All notable project changes are recorded here.
 
+## [Unreleased]
+
+### Added
+
+- Experimental Apple-silicon macOS installer and `gemma-local` command alias.
+- Localhost-first Mac startup with automatic Colima startup for SearXNG.
+- Portable macOS memory and uptime status plus explicit unavailable thermal fields.
+- Accurate local-deployment identity instructions for Gemma responses.
+
+### Validated
+
+- M3 Pro text inference and model-initiated web search through SearXNG with visible browser source cards.
+
 ## [0.1.0] - 2026-08-23
 
 ### Added

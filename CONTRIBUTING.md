@@ -13,11 +13,11 @@ Gemma Pi Local is an experiment with a narrow, evidence-first V0. Changes should
 ```bash
 python3 -m compileall -q app
 python3 -m pytest
-bash -n install.sh start.sh bin/gemma-pi scripts/doctor.sh scripts/smoke-test.sh scripts/searxng.sh scripts/pi-search-gate.sh
+bash -n install.sh install-macos.sh start.sh bin/gemma-pi scripts/doctor.sh scripts/smoke-test.sh scripts/searxng.sh scripts/pi-search-gate.sh
 node --check static/app.js
 ```
 
-Do not describe mocked tests as Raspberry Pi validation. Hardware reports should include Pi model, RAM, OS, architecture, storage, LiteRT-LM/model versions, peak temperature, throttle state, result, and relevant logs with secrets removed.
+Do not describe mocked tests as hardware validation. Reports should include device model, RAM, OS, architecture, storage, LiteRT-LM/model versions, available thermal or throttle data, result, and relevant logs with secrets removed.
 
 ## Scope rules
 
