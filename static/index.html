@@ -7,7 +7,7 @@
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
     <meta
       name="description"
-      content="Private multimodal Gemma chat running locally on Raspberry Pi."
+      content="Local multimodal Gemma chat with optional public-web search."
     />
     <title>Gemma Pi Local</title>
     <link rel="stylesheet" href="/assets/styles.css" />
@@ -19,7 +19,7 @@
           <span class="brand-mark" aria-hidden="true">G</span>
           <span>
             <strong>Gemma Pi Local</strong>
-            <small>Private multimodal AI on your Pi</small>
+            <small>On-device multimodal AI + web search</small>
           </span>
         </a>
         <div class="runtime-state" id="runtime-state" data-state="checking">
@@ -29,7 +29,7 @@
       </header>
 
       <main>
-        <section class="status-strip" aria-label="Raspberry Pi status">
+        <section class="status-strip" aria-label="System status">
           <div class="metric">
             <span>Temperature</span>
             <strong id="temperature">—</strong>
@@ -122,7 +122,7 @@
                 id="prompt-input"
                 rows="1"
                 maxlength="40000"
-                placeholder="Message Gemma on this Raspberry Pi…"
+                placeholder="Message Gemma locally…"
                 aria-label="Message"
               ></textarea>
               <button class="send-button" id="send-button" type="submit">

@@ -1,0 +1,2 @@
+-r requirements-app.txt
+litert-lm==0.16.1

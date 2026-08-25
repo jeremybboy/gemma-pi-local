@@ -1,7 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+resolve_path() {
+  local path="$1"
+  local target
+  while [[ -L "${path}" ]]; do
+    target="$(readlink "${path}")"
+    if [[ "${target}" == /* ]]; then
+      path="${target}"
+    else
+      path="$(cd "$(dirname "${path}")" && pwd)/${target}"
+    fi
+  done
+  echo "$(cd "$(dirname "${path}")" && pwd)/$(basename "${path}")"
+}
+
+SCRIPT_PATH="$(resolve_path "${BASH_SOURCE[0]}")"
 ROOT_DIR="$(cd "$(dirname "${SCRIPT_PATH}")/.." && pwd)"
 RUNTIME_DIR="${ROOT_DIR}/.runtime"
 PID_FILE="${RUNTIME_DIR}/gemma-pi.pid"
@@ -15,6 +29,12 @@ if [[ -f "${ROOT_DIR}/.env" ]]; then
 fi
 
 APP_PORT="${GEMMA_PI_PORT:-8080}"
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  DEFAULT_APP_HOST="127.0.0.1"
+else
+  DEFAULT_APP_HOST="0.0.0.0"
+fi
+APP_HOST="${GEMMA_PI_HOST:-${DEFAULT_APP_HOST}}"
 SEARCH_ENABLED="${GEMMA_PI_SEARCH_ENABLED:-true}"
 
 is_running() {
@@ -25,8 +45,8 @@ is_running() {
 }
 
 search_enabled() {
-  case "${SEARCH_ENABLED,,}" in
-    1|true|yes|on) return 0 ;;
+  case "${SEARCH_ENABLED}" in
+    1|true|TRUE|True|yes|YES|Yes|on|ON|On) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -36,6 +56,25 @@ ensure_search() {
   if ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1; then
     echo "Warning: Docker Compose is unavailable; web-search requests will be unavailable." >&2
     return 0
+  fi
+  if ! docker info >/dev/null 2>&1 && [[ "$(uname -s)" == "Darwin" ]] && command -v colima >/dev/null 2>&1; then
+    echo "Starting the local Colima container runtime..."
+    if ! colima start; then
+      echo "Warning: Colima did not start; web-search requests will be unavailable." >&2
+      return 0
+    fi
+    docker_ready=0
+    for _ in $(seq 1 30); do
+      if docker info >/dev/null 2>&1; then
+        docker_ready=1
+        break
+      fi
+      sleep 1
+    done
+    if [[ "${docker_ready}" != "1" ]]; then
+      echo "Warning: Docker did not become ready after Colima startup; web-search requests will be unavailable." >&2
+      return 0
+    fi
   fi
   if ! "${ROOT_DIR}/scripts/searxng.sh" start; then
     echo "Warning: SearXNG did not start; web-search requests will be unavailable." >&2
@@ -53,8 +92,8 @@ Commands:
   stop            Stop both processes cleanly
   status          Show process and API status
   logs [--follow] Show recent logs
-  ui              Print the trusted-LAN browser URL
-  doctor          Check the Pi, runtime, model, storage, and thermals
+  ui              Print the browser URL
+  doctor          Check this device, runtime, model, and storage
 EOF
 }
 
@@ -139,15 +178,20 @@ litert = data.get("litert", {})
 print(f"LiteRT-LM: {'ready' if litert.get('ok') else 'offline'}")
 search = data.get("search", {})
 print(f"Web search: {'ready' if search.get('ok') else 'offline'}")
-print(f"Temperature: {system.get('temperature_c', 'unavailable')} C")
-print(f"Throttled: {system.get('throttled', {}).get('raw', 'unavailable')}")
+temperature = system.get('temperature_c')
+print(f"Temperature: {f'{temperature} C' if temperature is not None else 'unavailable'}")
+print(f"Throttled: {system.get('throttled', {}).get('raw') or 'unavailable'}")
 PY
 }
 
 show_ui() {
   local ip
-  ip="$(hostname -I 2>/dev/null | awk '{print $1}')"
-  [[ -n "${ip}" ]] || ip="127.0.0.1"
+  if [[ "${APP_HOST}" == "127.0.0.1" || "${APP_HOST}" == "localhost" ]]; then
+    ip="127.0.0.1"
+  else
+    ip="$(hostname -I 2>/dev/null | awk '{print $1}')"
+    [[ -n "${ip}" ]] || ip="${APP_HOST}"
+  fi
   echo "http://${ip}:${APP_PORT}"
 }
 

@@ -1,11 +1,14 @@
-"""Read Raspberry Pi health information without third-party dependencies."""
+"""Read portable, non-sensitive host health without third-party dependencies."""
 
 from __future__ import annotations
 
 from pathlib import Path
+import platform
+import re
 import shutil
 import socket
 import subprocess
+import time
 from typing import Any
 
 
@@ -42,20 +45,81 @@ def _run(command: list[str]) -> str | None:
     return result.stdout.strip()
 
 
-def _memory() -> dict[str, int | None]:
+def _linux_memory() -> dict[str, int | None] | None:
     values: dict[str, int] = {}
     raw = _read_text("/proc/meminfo")
-    if raw:
-        for line in raw.splitlines():
-            key, _, value = line.partition(":")
-            fields = value.strip().split()
-            if fields and fields[0].isdigit():
-                values[key] = int(fields[0]) * 1024
+    if not raw:
+        return None
+    for line in raw.splitlines():
+        key, _, value = line.partition(":")
+        fields = value.strip().split()
+        if fields and fields[0].isdigit():
+            values[key] = int(fields[0]) * 1024
     return {
         "total_bytes": values.get("MemTotal"),
         "available_bytes": values.get("MemAvailable"),
         "swap_total_bytes": values.get("SwapTotal"),
         "swap_free_bytes": values.get("SwapFree"),
+    }
+
+
+def _macos_memory() -> dict[str, int | None] | None:
+    total_raw = _run(["sysctl", "-n", "hw.memsize"])
+    vm_raw = _run(["vm_stat"])
+    if not total_raw or not total_raw.isdigit():
+        return None
+
+    available_bytes: int | None = None
+    if vm_raw:
+        page_match = re.search(r"page size of (\d+) bytes", vm_raw)
+        page_size = int(page_match.group(1)) if page_match else 4096
+        page_counts: dict[str, int] = {}
+        for line in vm_raw.splitlines():
+            key, separator, value = line.partition(":")
+            if not separator:
+                continue
+            digits = value.strip().rstrip(".")
+            if digits.isdigit():
+                page_counts[key] = int(digits)
+        available_pages = sum(
+            page_counts.get(key, 0)
+            for key in (
+                "Pages free",
+                "Pages inactive",
+                "Pages speculative",
+                "Pages purgeable",
+            )
+        )
+        available_bytes = available_pages * page_size
+
+    swap_total: int | None = None
+    swap_free: int | None = None
+    swap_raw = _run(["sysctl", "-n", "vm.swapusage"])
+    if swap_raw:
+        total_match = re.search(r"total = ([\d.]+)M", swap_raw)
+        free_match = re.search(r"free = ([\d.]+)M", swap_raw)
+        if total_match:
+            swap_total = int(float(total_match.group(1)) * 1024 * 1024)
+        if free_match:
+            swap_free = int(float(free_match.group(1)) * 1024 * 1024)
+
+    return {
+        "total_bytes": int(total_raw),
+        "available_bytes": available_bytes,
+        "swap_total_bytes": swap_total,
+        "swap_free_bytes": swap_free,
+    }
+
+
+def _memory() -> dict[str, int | None]:
+    values = _linux_memory()
+    if values is None and platform.system() == "Darwin":
+        values = _macos_memory()
+    return values or {
+        "total_bytes": None,
+        "available_bytes": None,
+        "swap_total_bytes": None,
+        "swap_free_bytes": None,
     }
 
 
@@ -112,19 +176,29 @@ def _throttled() -> dict[str, Any]:
     }
 
 
+def _uptime_seconds() -> int | None:
+    uptime_raw = _read_text("/proc/uptime")
+    if uptime_raw:
+        try:
+            return int(float(uptime_raw.split()[0]))
+        except (ValueError, IndexError):
+            pass
+    if platform.system() == "Darwin":
+        boot_raw = _run(["sysctl", "-n", "kern.boottime"])
+        if boot_raw:
+            match = re.search(r"sec\s*=\s*(\d+)", boot_raw)
+            if match:
+                return max(0, int(time.time()) - int(match.group(1)))
+    return None
+
+
 def snapshot() -> dict[str, Any]:
     """Return a small, non-sensitive system health snapshot."""
 
     disk = shutil.disk_usage("/")
-    uptime_raw = _read_text("/proc/uptime")
-    uptime_seconds: int | None = None
-    if uptime_raw:
-        try:
-            uptime_seconds = int(float(uptime_raw.split()[0]))
-        except (ValueError, IndexError):
-            pass
     return {
         "hostname": socket.gethostname(),
+        "platform": platform.system(),
         "temperature_c": _temperature_c(),
         "throttled": _throttled(),
         "memory": _memory(),
@@ -132,5 +206,5 @@ def snapshot() -> dict[str, Any]:
             "total_bytes": disk.total,
             "free_bytes": disk.free,
         },
-        "uptime_seconds": uptime_seconds,
+        "uptime_seconds": _uptime_seconds(),
     }

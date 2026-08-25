@@ -11,7 +11,13 @@ if [[ -f "${ROOT_DIR}/.env" ]]; then
   set +a
 fi
 
-APP_HOST="${GEMMA_PI_HOST:-0.0.0.0}"
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  DEFAULT_APP_HOST="127.0.0.1"
+else
+  DEFAULT_APP_HOST="0.0.0.0"
+fi
+
+APP_HOST="${GEMMA_PI_HOST:-${DEFAULT_APP_HOST}}"
 APP_PORT="${GEMMA_PI_PORT:-8080}"
 LITERT_HOST="${GEMMA_PI_LITERT_HOST:-127.0.0.1}"
 LITERT_PORT="${GEMMA_PI_LITERT_PORT:-9379}"
@@ -47,11 +53,11 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-[[ -x "${VENV_DIR}/bin/litert-lm" ]] || fail "Run ./install.sh first."
-[[ -x "${VENV_DIR}/bin/uvicorn" ]] || fail "Run ./install.sh first."
+[[ -x "${VENV_DIR}/bin/litert-lm" ]] || fail "Run the installer for your platform first."
+[[ -x "${VENV_DIR}/bin/uvicorn" ]] || fail "Run the installer for your platform first."
 
 if ! "${VENV_DIR}/bin/litert-lm" list 2>/dev/null | awk -v model="${MODEL_ID}" '$1 == model {found=1} END {exit !found}'; then
-  fail "Model ${MODEL_ID} is not imported. Re-run ./install.sh."
+  fail "Model ${MODEL_ID} is not imported. Re-run the installer for your platform."
 fi
 if port_open "${LITERT_HOST}" "${LITERT_PORT}"; then
   fail "Port ${LITERT_PORT} is already in use."
@@ -85,5 +91,11 @@ echo "Starting Gemma Pi Local on ${APP_HOST}:${APP_PORT}..."
 APP_PID=$!
 
 echo "Gemma Pi Local is running."
-echo "Open http://$(hostname -I 2>/dev/null | awk '{print $1}'):${APP_PORT} from the trusted LAN."
+if [[ "${APP_HOST}" == "127.0.0.1" || "${APP_HOST}" == "localhost" ]]; then
+  echo "Open http://127.0.0.1:${APP_PORT} on this computer."
+else
+  DISPLAY_HOST="$(hostname -I 2>/dev/null | awk '{print $1}')"
+  [[ -n "${DISPLAY_HOST}" ]] || DISPLAY_HOST="${APP_HOST}"
+  echo "Open http://${DISPLAY_HOST}:${APP_PORT} from the trusted LAN."
+fi
 wait "${APP_PID}"
