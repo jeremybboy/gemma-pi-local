@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 import platform
 import re
@@ -66,7 +67,13 @@ def _linux_memory() -> dict[str, int | None] | None:
 def _macos_memory() -> dict[str, int | None] | None:
     total_raw = _run(["sysctl", "-n", "hw.memsize"])
     vm_raw = _run(["vm_stat"])
-    if not total_raw or not total_raw.isdigit():
+    total_bytes: int | None = int(total_raw) if total_raw and total_raw.isdigit() else None
+    if total_bytes is None:
+        try:
+            total_bytes = os.sysconf("SC_PHYS_PAGES") * os.sysconf("SC_PAGE_SIZE")
+        except (OSError, TypeError, ValueError):
+            total_bytes = None
+    if total_bytes is None:
         return None
 
     available_bytes: int | None = None
@@ -104,7 +111,7 @@ def _macos_memory() -> dict[str, int | None] | None:
             swap_free = int(float(free_match.group(1)) * 1024 * 1024)
 
     return {
-        "total_bytes": int(total_raw),
+        "total_bytes": total_bytes,
         "available_bytes": available_bytes,
         "swap_total_bytes": swap_total,
         "swap_free_bytes": swap_free,

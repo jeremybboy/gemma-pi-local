@@ -28,6 +28,7 @@ from app.agent import (
 from app.config import settings
 from app.search import SearchError, SearchResult, SearXNGClient, render_search_evidence
 from app.system_status import snapshot
+from app.version import __version__
 
 
 MODEL_ID_PATTERN = re.compile(r"^[A-Za-z0-9._-]{1,128}$")
@@ -49,8 +50,8 @@ class ChatRequest(BaseModel):
 
 app = FastAPI(
     title="Gemma Pi Local",
-    description="Local-only web gateway for LiteRT-LM on Raspberry Pi.",
-    version="0.1.0",
+    description="Local web gateway for LiteRT-LM on supported edge devices.",
+    version=__version__,
 )
 
 

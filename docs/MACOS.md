@@ -14,6 +14,8 @@ This profile runs the same FastAPI UI, Gemma 4 E4B model, LiteRT-LM gateway, and
 
 The proof completed a local arithmetic turn and a current-information turn that caused Gemma to emit a structured `web_search` call. SearXNG returned sources, the final answer cited them, and the browser rendered source cards. The model process used about 5.8 GB resident memory during the observed run; this is one measurement, not a minimum-memory guarantee or benchmark.
 
+On 2026-08-25, the v0.2.0 machine-readable verifier also completed against the real stack. `gemma-local verify --json --live` reported 13 passes, zero warnings, zero failures, and two expected skips for temperature and firmware-throttle telemetry. It confirmed the installed Python and LiteRT-LM 0.16.1 runtime, imported `gemma4-e4b`, application/model/search readiness, an image-plus-WAV text round trip, and an agentic search response with five source links and cited text. The multimodal result proves transport and inference completion, not semantic correctness.
+
 ## Install
 
 ```bash
@@ -37,6 +39,8 @@ open http://127.0.0.1:8080
 ```bash
 ~/.local/bin/gemma-local status
 ~/.local/bin/gemma-local logs --follow
+~/.local/bin/gemma-local verify --json
+~/.local/bin/gemma-local verify --json --live
 ~/.local/bin/gemma-local stop
 ```
 

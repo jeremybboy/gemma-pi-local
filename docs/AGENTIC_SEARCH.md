@@ -27,7 +27,7 @@ There is no manual search toggle in the intended interface. The model receives o
 
 ## Current checkpoint
 
-Implemented on `feature/agentic-web-search`:
+Merged on `main`:
 
 - A loopback-only SearXNG Compose service on port 8888 with JSON output enabled.
 - A constrained Python adapter with a 300-character query cap, fixed loopback service URL, timeout, maximum result count, URL validation, deduplication, and deterministic source numbers.
@@ -37,11 +37,16 @@ Implemented on `feature/agentic-web-search`:
 - `gemma-pi start` attempts to ensure SearXNG is running; `gemma-pi stop` leaves the lightweight search service available.
 - Local automated tests for the adapter, tool protocol, gateway, and existing V0 behavior.
 
+Validated on the target Pi:
+
+- SearXNG returned live results and Gemma emitted a valid structured tool call.
+- One integrated local turn and one integrated search-answer turn completed through `/api/chat` with sources and cited text.
+- The operator reported that the browser rendered the search response and source links.
+
 Not validated yet:
 
-- The complete two-pass `/api/chat` path on the target Pi.
-- Browser rendering of live source cards on the target Pi.
-- Repeated thermal, memory, and shutdown behavior under full search-answer cycles.
+- The final repeated gate of two current-information prompts, two local-only prompts, and three consecutive search cycles.
+- Sustained thermal, memory, and shutdown behavior under repeated full search-answer cycles.
 
 Treating text that merely resembles a function call as authorization to access the web remains forbidden. Only the validated structured call is executable.
 

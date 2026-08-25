@@ -6,6 +6,8 @@
 
 Run Gemma 4 locally on a Raspberry Pi 5 or Apple-silicon Mac. Ask with text, images, and WAV audio; Gemma can autonomously search the public web through self-hosted SearXNG and return cited text answers in a local browser UI.
 
+The repository is also an agent-readable reference implementation: coding agents can reuse its pinned installation path, constrained tool loop, machine-readable verifier, compatibility evidence, and documented extension points instead of reconstructing the stack from scratch.
+
 > **V0 validated:** on 2026-08-23, the repository installed without source edits on the target 8 GB Pi, passed `gemma-pi doctor`, started from one command, served the LAN interface, and completed operator-reported text and multimodal browser interactions.
 
 | Profile | Support | Interface | Validation |
@@ -95,8 +97,23 @@ Useful commands:
 | `gemma-pi logs --follow` | Follow startup and inference logs |
 | `gemma-pi ui` | Print the browser URL |
 | `gemma-pi doctor` | Check architecture, RAM, disk, runtime, model, and thermals |
+| `gemma-pi verify --json` | Emit machine-readable installation and runtime evidence |
+| `gemma-pi verify --json --live` | Add real multimodal and agentic-search round trips |
 
 If `~/.local/bin` is already on your `PATH`, omit the full path.
+
+## For coding agents
+
+Start with [AGENTS.md](AGENTS.md) for the operational contract, exact commands, architecture map, invariants, extension points, and required validation discipline. [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) separates validated hardware and capabilities from shared-but-untested code paths.
+
+After the application is running, an agent can collect a stable JSON report without scraping terminal prose:
+
+```bash
+~/.local/bin/gemma-pi verify --json
+~/.local/bin/gemma-pi verify --json --live
+```
+
+The live multimodal check proves that an inline image and WAV traversed the gateway and produced text; it does not score whether Gemma interpreted them correctly. The live search check requires a structured tool call, source links, cited answer text, and a completed stream.
 
 ## Configuration
 
@@ -155,6 +172,8 @@ bash -n install.sh install-macos.sh start.sh bin/gemma-pi scripts/doctor.sh scri
 ```
 
 The automated tests mock LiteRT-LM; they do not prove inference performance or Raspberry Pi compatibility. Contributions should follow [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Release preparation and tag automation are documented in [docs/RELEASING.md](docs/RELEASING.md). A tag is published only after its commit reaches `main`.
 
 ## Direction
 

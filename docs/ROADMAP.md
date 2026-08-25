@@ -9,10 +9,10 @@
 - Trusted-LAN security boundary and honest validation matrix.
 - Core installer, startup, UI, and multimodal-input path validated on the target Pi 5 8 GB.
 
-## Candidate V0.2 work
+## Candidate post-v0.2 work
 
-- Model-initiated SearXNG search with one bounded tool call, visible sources, and local-Pi validation.
-- Package deterministic multimodal fixtures and expected capability-level checks.
+- Capture target-device evidence from the machine-readable verifier.
+- Package durable named multimodal fixtures beyond the verifier's generated transport smoke test.
 - Capture repeatable shutdown, post-inference thermal, memory, and timing evidence.
 - Improve cancellation, inference timing, and memory/thermal observations.
 - Add a systemd user service only if manual process control proves stable.

@@ -23,7 +23,8 @@ jobs:
           cache: pip
       - run: python -m pip install -r requirements-dev.txt
       - run: python -m pytest
-      - run: python -m compileall -q app scripts/probe-tool-call.py scripts/probe-agent-search.py
+      - run: python -m compileall -q app scripts/probe-tool-call.py scripts/probe-agent-search.py scripts/verify_install.py
+      - run: python scripts/verify_install.py --help
 
   shell:
     runs-on: ubuntu-latest
