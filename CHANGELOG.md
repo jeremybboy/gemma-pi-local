@@ -4,16 +4,33 @@ All notable project changes are recorded here.
 
 ## [Unreleased]
 
+## [0.2.0]
+
 ### Added
 
+- Model-initiated, one-call SearXNG search with gateway-owned source links.
 - Experimental Apple-silicon macOS installer and `gemma-local` command alias.
 - Localhost-first Mac startup with automatic Colima startup for SearXNG.
 - Portable macOS memory and uptime status plus explicit unavailable thermal fields.
 - Accurate local-deployment identity instructions for Gemma responses.
+- Agent operating guide and platform/capability evidence matrix.
+- Machine-readable `verify --json` runtime evidence and optional live multimodal
+  and agentic-search checks.
+- Version-matched tag validation and automated GitHub release publication.
 
 ### Validated
 
+- Raspberry Pi structured Gemma tool calling and loopback SearXNG search.
 - M3 Pro text inference and model-initiated web search through SearXNG with visible browser source cards.
+- M3 Pro `verify --json --live` with 13 passes, no failures, a completed
+  image-plus-WAV round trip, and an agentic search response with five sources.
+
+### Evidence boundary
+
+- The verifier is covered by automated tests and a real Mac live run but still
+  needs captured `--live` output from the target Pi.
+- The application remains unauthenticated, has no TLS or persistence, and
+  returns text only.
 
 ## [0.1.0] - 2026-08-23
 

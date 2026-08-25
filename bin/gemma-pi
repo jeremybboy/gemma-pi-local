@@ -94,7 +94,24 @@ Commands:
   logs [--follow] Show recent logs
   ui              Print the browser URL
   doctor          Check this device, runtime, model, and storage
+  verify [options] Emit installation and runtime evidence
+
+Verify options:
+  --json          Emit a stable JSON report for automation
+  --live          Add real multimodal and agentic-search round trips
 EOF
+}
+
+verify_install() {
+  local python_bin="${ROOT_DIR}/.venv/bin/python"
+  if [[ ! -x "${python_bin}" ]]; then
+    python_bin="$(command -v python3 || true)"
+  fi
+  if [[ -z "${python_bin}" ]]; then
+    echo "Python is unavailable; run the installer for this platform." >&2
+    return 1
+  fi
+  "${python_bin}" "${ROOT_DIR}/scripts/verify_install.py" "$@"
 }
 
 start_app() {
@@ -209,6 +226,10 @@ case "${command}" in
     ;;
   ui) show_ui ;;
   doctor) "${ROOT_DIR}/scripts/doctor.sh" ;;
+  verify)
+    shift
+    verify_install "$@"
+    ;;
   help|-h|--help) show_help ;;
   *)
     echo "Unknown command: ${command}" >&2

@@ -7,6 +7,7 @@
 3. LiteRT-LM serves its OpenAI-compatible API on loopback and owns model loading and inference.
 4. SearXNG serves its JSON Search API on loopback port 8888. It is the only component that queries external search engines.
 5. `bin/gemma-pi` (also installed as `gemma-local` on macOS) starts SearXNG when available, controls the model/UI processes, and exposes status, logs, URL, and doctor commands.
+6. `scripts/verify_install.py` emits a stable JSON evidence report. Its optional live mode sends generated image and WAV fixtures through the real gateway and requires a structured search event with cited text.
 
 ## Multimodal request flow
 

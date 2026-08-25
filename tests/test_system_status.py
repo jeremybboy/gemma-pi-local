@@ -62,6 +62,22 @@ def test_macos_uptime_uses_boot_time(monkeypatch) -> None:
     assert system_status._uptime_seconds() == 600
 
 
+def test_macos_memory_falls_back_to_sysconf(monkeypatch) -> None:
+    monkeypatch.setattr(system_status, "_run", lambda _command: None)
+
+    def fake_sysconf(name: str) -> int:
+        return {"SC_PHYS_PAGES": 100, "SC_PAGE_SIZE": 16_384}[name]
+
+    monkeypatch.setattr(system_status.os, "sysconf", fake_sysconf)
+    result = system_status._macos_memory()
+    assert result == {
+        "total_bytes": 100 * 16_384,
+        "available_bytes": None,
+        "swap_total_bytes": None,
+        "swap_free_bytes": None,
+    }
+
+
 def test_throttle_status_separates_current_and_historical(monkeypatch) -> None:
     monkeypatch.setattr(
         system_status,
