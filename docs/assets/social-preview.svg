@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title description">
+  <title id="title">Gemma Pi Local</title>
+  <desc id="description">Multimodal local Gemma on Raspberry Pi and Apple silicon with model-initiated web search.</desc>
+  <rect width="1280" height="640" fill="#f1eee5"/>
+  <rect width="682" height="640" fill="#111410"/>
+  <rect x="50" y="52" width="12" height="98" fill="#ff5b35"/>
+  <text x="88" y="82" fill="#ff5b35" font-family="Arial Narrow, Helvetica Neue, sans-serif" font-size="18" font-weight="700" letter-spacing="3">LOCAL MULTIMODAL AI</text>
+  <text x="82" y="184" fill="#f1eee5" font-family="Arial Narrow, Helvetica Neue, sans-serif" font-size="88" font-weight="800" letter-spacing="-3">GEMMA PI</text>
+  <text x="82" y="270" fill="#f1eee5" font-family="Arial Narrow, Helvetica Neue, sans-serif" font-size="88" font-weight="800" letter-spacing="-3">LOCAL</text>
+  <line x1="82" y1="316" x2="598" y2="316" stroke="#68736a" stroke-width="2"/>
+  <text x="82" y="364" fill="#f1eee5" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="500">Text, image and WAV understanding.</text>
+  <text x="82" y="403" fill="#f1eee5" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="500">Model-initiated web search.</text>
+  <text x="82" y="442" fill="#f1eee5" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="500">One local browser interface.</text>
+  <rect x="82" y="510" width="178" height="42" fill="#f1eee5"/>
+  <text x="96" y="538" fill="#111410" font-family="SFMono-Regular, Menlo, monospace" font-size="16" font-weight="700">RASPBERRY PI 5</text>
+  <rect x="270" y="510" width="252" height="42" fill="#2ec4b6"/>
+  <text x="284" y="538" fill="#111410" font-family="SFMono-Regular, Menlo, monospace" font-size="16" font-weight="700">APPLE SILICON · EXP.</text>
+  <text x="82" y="594" fill="#9ba49c" font-family="SFMono-Regular, Menlo, monospace" font-size="15">LITERT-LM  /  GEMMA 4 E4B  /  SEARXNG</text>
+
+  <text x="732" y="66" fill="#111410" font-family="Arial Narrow, Helvetica Neue, sans-serif" font-size="17" font-weight="800" letter-spacing="2">01  ASK</text>
+  <line x1="732" y1="81" x2="1214" y2="81" stroke="#111410" stroke-width="2"/>
+  <text x="732" y="119" fill="#4e5850" font-family="SFMono-Regular, Menlo, monospace" font-size="15">TEXT</text>
+  <line x1="732" y1="141" x2="856" y2="141" stroke="#111410" stroke-width="4"/>
+  <line x1="732" y1="156" x2="822" y2="156" stroke="#111410" stroke-width="4"/>
+  <text x="900" y="119" fill="#4e5850" font-family="SFMono-Regular, Menlo, monospace" font-size="15">IMAGE</text>
+  <rect x="900" y="132" width="86" height="58" fill="none" stroke="#111410" stroke-width="3"/>
+  <circle cx="966" cy="149" r="7" fill="#ff5b35"/>
+  <path d="M903 181 L928 158 L944 172 L956 163 L983 187" fill="none" stroke="#111410" stroke-width="3"/>
+  <text x="1044" y="119" fill="#4e5850" font-family="SFMono-Regular, Menlo, monospace" font-size="15">WAV</text>
+  <path d="M1044 161 L1054 161 L1062 140 L1072 183 L1082 130 L1092 175 L1102 149 L1112 161 L1124 161" fill="none" stroke="#ff5b35" stroke-width="4"/>
+  <path d="M850 211 L850 233 L902 233" fill="none" stroke="#111410" stroke-width="3"/>
+  <path d="M894 226 L906 233 L894 240" fill="none" stroke="#111410" stroke-width="3"/>
+
+  <rect x="732" y="255" width="294" height="158" fill="#ff5b35"/>
+  <text x="758" y="290" fill="#111410" font-family="SFMono-Regular, Menlo, monospace" font-size="14" font-weight="700">02  LOCAL INFERENCE</text>
+  <text x="758" y="348" fill="#111410" font-family="Arial Narrow, Helvetica Neue, sans-serif" font-size="44" font-weight="800">GEMMA 4 E4B</text>
+  <text x="758" y="382" fill="#111410" font-family="Helvetica Neue, Arial, sans-serif" font-size="18">understand · reason · decide</text>
+  <line x1="1026" y1="334" x2="1063" y2="334" stroke="#111410" stroke-width="3"/>
+  <path d="M1055 327 L1067 334 L1055 341" fill="none" stroke="#111410" stroke-width="3"/>
+  <rect x="1067" y="289" width="147" height="90" fill="#2ec4b6"/>
+  <text x="1084" y="317" fill="#111410" font-family="SFMono-Regular, Menlo, monospace" font-size="13" font-weight="700">WHEN NEEDED</text>
+  <text x="1084" y="348" fill="#111410" font-family="Arial Narrow, Helvetica Neue, sans-serif" font-size="25" font-weight="800">SEARXNG</text>
+  <text x="1084" y="367" fill="#111410" font-family="Helvetica Neue, Arial, sans-serif" font-size="13">public web</text>
+
+  <path d="M878 413 L878 444" fill="none" stroke="#111410" stroke-width="3"/>
+  <path d="M871 436 L878 448 L885 436" fill="none" stroke="#111410" stroke-width="3"/>
+  <text x="732" y="480" fill="#111410" font-family="Arial Narrow, Helvetica Neue, sans-serif" font-size="17" font-weight="800" letter-spacing="2">03  ANSWER</text>
+  <rect x="732" y="497" width="482" height="95" fill="#ffffff" stroke="#111410" stroke-width="3"/>
+  <line x1="756" y1="524" x2="1034" y2="524" stroke="#111410" stroke-width="5"/>
+  <line x1="756" y1="544" x2="1110" y2="544" stroke="#111410" stroke-width="5"/>
+  <line x1="756" y1="564" x2="970" y2="564" stroke="#111410" stroke-width="5"/>
+  <rect x="1135" y="516" width="55" height="55" fill="#111410"/>
+  <text x="1146" y="550" fill="#f1eee5" font-family="SFMono-Regular, Menlo, monospace" font-size="14" font-weight="700">[1–5]</text>
+</svg>

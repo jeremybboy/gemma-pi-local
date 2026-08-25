@@ -1,10 +1,19 @@
 # Gemma Pi Local
 
+![Gemma Pi Local: multimodal local AI with web search](docs/assets/social-preview.png)
+
 [![CI](https://github.com/jeremybboy/gemma-pi-local/actions/workflows/ci.yml/badge.svg)](https://github.com/jeremybboy/gemma-pi-local/actions/workflows/ci.yml)
 
-Ask Gemma 4 with text, images, and WAV audio on a Raspberry Pi 5—or experimentally on Apple silicon—then receive text responses and model-initiated web search in a local browser UI.
+Run Gemma 4 locally on a Raspberry Pi 5 or Apple-silicon Mac. Ask with text, images, and WAV audio; Gemma can autonomously search the public web through self-hosted SearXNG and return cited text answers in a local browser UI.
 
 > **V0 validated:** on 2026-08-23, the repository installed without source edits on the target 8 GB Pi, passed `gemma-pi doctor`, started from one command, served the LAN interface, and completed operator-reported text and multimodal browser interactions.
+
+| Profile | Support | Interface | Validation |
+| --- | --- | --- | --- |
+| Raspberry Pi 5, 8 GB | Primary V0 target | Trusted-LAN browser | Real-device install and multimodal interaction |
+| Apple silicon macOS | Experimental | Localhost browser | M3 Pro local and agentic-search paths |
+
+Inference and media analysis run locally. Only search queries and search-engine responses leave the device when Gemma requests the optional `web_search` tool.
 
 ## What it does
 
